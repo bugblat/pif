@@ -1,0 +1,101 @@
+# pif preferences
+#
+# first written: 4-Jul-2013
+#
+#################################################
+
+BLOCK RESETPATHS ;
+BLOCK ASYNCPATHS ;
+
+  BANK 0 VCCIO 3.3 V;
+  BANK 1 VCCIO 3.3 V;
+  BANK 2 VCCIO 3.3 V;
+  BANK 3 VCCIO 3.3 V;
+
+TRACEID "00111100" ;
+
+IOBUF ALLPORTS IO_TYPE=LVCMOS33 ;
+
+SYSCONFIG JTAG_PORT=DISABLE  SDM_PORT=PROGRAMN  I2C_PORT=DISABLE  SLAVE_SPI_PORT=ENABLE MCCLK_FREQ=10.23 ;
+
+#################################################
+
+    USERCODE ASCII  "PIF0"      ;
+##  USERCODE HEX    "01020304"  ;
+
+    LOCATE COMP "GSRn"          SITE "136" ; # use the TDI pad as a global reset
+
+## top bank
+#   LOCATE COMP "FDONE"         SITE "109" ;
+#   LOCATE COMP "FINITn"        SITE "110" ;
+    LOCATE COMP "LEDR"          SITE "112" ;
+    LOCATE COMP "LEDG"          SITE "113" ;
+#   LOCATE COMP "FPROGn"        SITE "119" ;
+#   LOCATE COMP "FJTAGn"        SITE "120" ;
+    LOCATE COMP "SDA"           SITE "125" ;
+    LOCATE COMP "SCL"           SITE "126" ;
+    LOCATE COMP "PiCLK"         SITE "128" ;
+#   LOCATE COMP "FTMS"          SITE "130" ;
+#   LOCATE COMP "FTCK"          SITE "131" ;
+#   LOCATE COMP "FTDI"          SITE "136" ;
+#   LOCATE COMP "FTDO"          SITE "137" ;
+
+## right bank
+    LOCATE COMP "R0"            SITE "74"  ;
+    LOCATE COMP "R1"            SITE "76"  ;
+    LOCATE COMP "R2"            SITE "82"  ;
+    LOCATE COMP "R3"            SITE "84"  ;
+    LOCATE COMP "R4"            SITE "92"  ;
+    LOCATE COMP "R5"            SITE "94"  ;
+    LOCATE COMP "R6"            SITE "98"  ;
+    LOCATE COMP "R7"            SITE "100" ;
+    LOCATE COMP "R8"            SITE "105" ;
+    LOCATE COMP "R9"            SITE "107" ;
+
+## bottom bank
+    LOCATE COMP "B0"            SITE "38"  ;
+    LOCATE COMP "B1"            SITE "42"  ;
+#   LOCATE COMP "SCLK"          SITE "44"  ;
+#   LOCATE COMP "MISO"          SITE "45"  ;
+    LOCATE COMP "B2"            SITE "47"  ;
+    LOCATE COMP "B3"            SITE "49"  ;
+    LOCATE COMP "B4"            SITE "59"  ;
+    LOCATE COMP "B5"            SITE "61"  ;
+    LOCATE COMP "B6"            SITE "65"  ;
+#   LOCATE COMP "CE0_FSn"       SITE "70"  ;
+#   LOCATE COMP "MOSI"          SITE "71"  ;
+
+## left bank
+    LOCATE COMP "CE1"           SITE "3"   ;
+    LOCATE COMP "XCE1"          SITE "4"   ;
+    LOCATE COMP "XCE0"          SITE "6"   ;
+    LOCATE COMP "GPIO25"        SITE "9"   ;
+    LOCATE COMP "XIO25"         SITE "10"  ;
+    LOCATE COMP "GPIO24"        SITE "11"  ;
+    LOCATE COMP "XIO24"         SITE "12"  ;
+    LOCATE COMP "GPIO23"        SITE "13"  ;
+    LOCATE COMP "XIO23"         SITE "14"  ;
+    LOCATE COMP "GPIO22"        SITE "19"  ;
+    LOCATE COMP "GPIO27"        SITE "20"  ;
+    LOCATE COMP "XIO22"         SITE "21"  ;
+    LOCATE COMP "XIO27"         SITE "22"  ;
+    LOCATE COMP "GPIO18"        SITE "23"  ;
+    LOCATE COMP "XIO18"         SITE "24"  ;
+    LOCATE COMP "GPIO17"        SITE "25"  ;
+    LOCATE COMP "XIO17"         SITE "26"  ;
+    LOCATE COMP "GPIO15"        SITE "27"  ;
+    LOCATE COMP "XIO15"         SITE "28"  ;
+    LOCATE COMP "GPIO14"        SITE "32"  ;
+    LOCATE COMP "XIO14"         SITE "33"  ;
+    LOCATE COMP "XCLK"          SITE "34"  ;
+
+
+IOBUF PORT "GSRn" IO_TYPE=LVCMOS33 PULLMODE=UP   ;
+IOBUF PORT "LEDR" IO_TYPE=LVCMOS33 PULLMODE=DOWN ;
+IOBUF PORT "LEDG" IO_TYPE=LVCMOS33 PULLMODE=DOWN ;
+IOBUF PORT "SCL"  IO_TYPE=LVCMOS33 PULLMODE=UP   ;
+IOBUF PORT "SDA"  IO_TYPE=LVCMOS33 PULLMODE=UP   ;
+
+##  FREQUENCY NET "KLK/clkIn" 25.0 MHz HOLD_MARGIN 0.5 nS ;
+
+## EOF ##########################################

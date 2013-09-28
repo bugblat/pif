@@ -1,0 +1,10 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>$content.title</title>
+  $if content.cssfiles:
+    $for f in content.cssfiles.split():
+      <link rel="stylesheet" href="$f" />
+</head>
+<body>

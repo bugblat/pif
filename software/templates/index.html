@@ -1,0 +1,20 @@
+$def with (state, form)
+$var title: pif Experiment
+$var cssfiles: static/style.css
+
+<p id='current'>Current LED state : $state</p>
+$#<hr>
+<form name="main" method="post">
+  $:form.render()
+  <input type="submit" value='Set' />
+</form>
+
+$#<form method="post" name="main">
+$#  <label for="Red and Green LEDs">Red and Green LEDs</label>
+$#  <select id="Red and Green LEDs" name="Red and Green LEDs">
+$#    <option value="alternating">alternating</option>
+$#    <option value="synchronized">synchronized</option>
+$#    <option value="off">off</option>
+$#  </select>
+$#  <input type="submit" value="Set">
+$#</form>

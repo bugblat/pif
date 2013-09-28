@@ -1,0 +1,23 @@
+$def with (content)
+$# this is a comment
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>$content.title</title>
+  $if content.cssfiles:
+    $for f in content.cssfiles.split():
+      <link rel="stylesheet" href="$f" />
+</head>
+<body>
+  <header>
+    Change this header text to describe your pif project!
+  </header>
+
+  $:content
+
+  <footer>
+    This pif control page was built in Python with web.py
+  </footer>
+</body>
+</html>

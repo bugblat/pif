@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BaliProject version="2.0" title="pif" device="LCMXO2-7000HC-4TG144C" default_implementation="flasher">
+    <Options>
+        <Option name="HDL type" value="VHDL"/>
+    </Options>
+    <Implementation title="flasher" dir="syn" description="flasher" default_strategy="Strategy1">
+        <Options def_top="flasher"/>
+        <Source name="../../common/flasher.vhd" type="VHDL" type_short="VHDL">
+            <Options top_module="flasher"/>
+        </Source>
+        <Source name="../../common/piffla.vhd" type="VHDL" type_short="VHDL">
+            <Options/>
+        </Source>
+        <Source name="../../common/pif.lpf" type="Logic Preference" type_short="LPF">
+            <Options/>
+        </Source>
+    </Implementation>
+    <Strategy name="Strategy1" file="null.sty"/>
+</BaliProject>
