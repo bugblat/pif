@@ -4,7 +4,7 @@
 //
 // Author: Mike McCauley
 // Copyright (C) 2011-2013 Mike McCauley
-// $Id: bcm2835.h,v 1.8 2013/02/15 22:06:09 mikem Exp mikem $
+// $Id: bcm2835.h,v 1.12 2013/10/30 03:09:31 mikem Exp mikem $
 //
 /// \mainpage C library for Broadcom BCM 2835 as used in Raspberry Pi
 ///
@@ -22,7 +22,7 @@
 /// BCM 2835).
 ///
 /// The version of the package that this documentation refers to can be downloaded 
-/// from http://www.airspayce.com/mikem/bcm2835/bcm2835-1.26.tar.gz
+/// from http://www.airspayce.com/mikem/bcm2835/bcm2835-1.32.tar.gz
 /// You can find the latest version at http://www.airspayce.com/mikem/bcm2835
 ///
 /// Several example programs are provided.
@@ -35,14 +35,16 @@
 /// Please use that group for all questions and discussions on this topic. 
 /// Do not contact the author directly, unless it is to discuss commercial licensing.
 ///
-/// Tested on debian6-19-04-2012, 2012-07-15-wheezy-raspbian and Occidentalisv01
+/// Tested on debian6-19-04-2012, 2012-07-15-wheezy-raspbian, 2013-07-26-wheezy-raspbian
+/// and Occidentalisv01
 /// CAUTION: it has been observed that when detect enables such as bcm2835_gpio_len() 
 /// are used and the pin is pulled LOW
-/// it can cause temporary hangs on 2012-07-15-wheezy-raspbian and Occidentalisv01.
-/// Reason for this is not yet determined, but suspect that an interrupt handler is
+/// it can cause temporary hangs on 2012-07-15-wheezy-raspbian, 2013-07-26-wheezy-raspbian
+/// and Occidentalisv01.
+/// Reason for this is not yet determined, but we suspect that an interrupt handler is
 /// hitting a hard loop on those OSs.
 /// If you must use bcm2835_gpio_len() and friends, make sure you disable the pins with 
-/// bcm2835_gpio_cler_len() and friends after use. 
+/// bcm2835_gpio_clr_len() and friends after use. 
 ///
 /// \par Installation
 ///
@@ -127,6 +129,50 @@
 /// - P1-03 (SDA)
 /// - P1-05 (SLC)
 ///
+/// \par PWM
+///
+/// The BCM2835 supports hardware PWM on a limited subset of GPIO pins. This bcm2835 library provides 
+/// functions for configuring and controlling PWM output on these pins.
+///
+/// The BCM2835 contains 2 independent PWM channels (0 and 1), each of which be connnected to a limited subset of 
+/// GPIO pins. The following GPIO pins may be connected to the following PWM channels (from section 9.5):
+/// \code
+/// GPIO PIN    RPi pin  PWM Channel    ALT FUN
+///    12                    0            0
+///    13                    1            0
+///    18         1-12       0            5
+///    19                    1            5
+///    40                    0            0
+///    41                    1            0
+///    45                    1            0
+///    52                    0            1
+///    53                    1            1
+/// \endcode
+/// In order for a GPIO pin to emit output from its PWM channel, it must be set to the Alt Function given above.
+/// Note carefully that current versions of the Raspberry Pi only expose one of these pins (GPIO 18 = RPi Pin 1-12)
+/// on the IO headers, and therefore this is the only IO pin on the RPi that can be used for PWM.
+/// Further it must be set to ALT FUN 5 to get PWM output.
+///
+/// Both PWM channels are driven by the same PWM clock, whose clock dvider can be varied using 
+/// bcm2835_pwm_set_clock(). Each channel can be separately enabled with bcm2835_pwm_set_mode().
+/// The average output of the PWM channel is determined by the ratio of DATA/RANGE for that channel.
+/// Use bcm2835_pwm_set_range() to set the range and bcm2835_pwm_set_data() to set the data in that ratio
+///
+/// Each PWM channel can run in either Balanced or Mark-Space mode. In Balanced mode, the hardware 
+/// sends a combination of clock pulses that results in an overall DATA pulses per RANGE pulses.
+/// In Mark-Space mode, the hardware sets the output HIGH for DATA clock pulses wide, followed by 
+/// LOW for RANGE-DATA clock pulses. 
+///
+/// The PWM clock can be set to control the PWM pulse widths. The PWM clock is derived from 
+/// a 19.2MHz clock. You can set any divider, but some common ones are provided by the BCM2835_PWM_CLOCK_DIVIDER_*
+/// values of \ref bcm2835PWMClockDivider.
+/// 
+/// For example, say you wanted to drive a DC motor with PWM at about 1kHz, 
+/// and control the speed in 1/1024 increments from 
+/// 0/1024 (stopped) through to 1024/1024 (full on). In that case you might set the 
+/// clock divider to be 16, and the RANGE to 1024. The pulse repetition frequency will be
+/// 1.2MHz/1024 = 1171.875Hz.
+///
 /// \par Real Time performance constraints
 ///
 /// The bcm2835 is a library for user programs (i.e. they run in 'userland'). 
@@ -147,6 +193,17 @@
 ///  sched_setscheduler(0, SCHED_FIFO, &sp);
 ///  mlockall(MCL_CURRENT | MCL_FUTURE);
 /// \endcode
+///
+/// \par Bindings to other languages
+///
+/// mikem has made Perl bindings available at CPAN:
+///  http://search.cpan.org/~mikem/Device-BCM2835-1.9/lib/Device/BCM2835.pm
+/// Matthew Baker has kindly made Python bindings available at:
+///  https://github.com/mubeta06/py-libbcm2835
+/// Gary Marks has created a Serial Peripheral Interface (SPI) command-line utility 
+/// for Raspberry Pi, based on the bcm2835 library. The 
+/// utility, spincl, is licensed under Open Source GNU GPLv3 by iP Solutions (http://ipsolutionscorp.com), as a 
+/// free download with source included: http://ipsolutionscorp.com/raspberry-pi-spi-utility/
 ///
 /// \par Open Source Licensing GPL V2
 ///
@@ -229,6 +286,19 @@
 /// \version 1.25 Updated author and distribution location details to airspayce.com
 /// \version 1.26 Added missing unmapmem for pads in bcm2835_close to prevent a memory leak. 
 ///               Reported by Hartmut Henkel.
+/// \version 1.27 bcm2835_gpio_set_pad() no longer needs BCM2835_PAD_PASSWRD: it is
+///               now automatically included.
+///               Added suport for PWM mode with bcm2835_pwm_* functions.
+/// \version 1.28 Fixed a problem where bcm2835_spi_writenb() would have problems with transfers of more than
+///               64 bytes dues to read buffer filling. Patched by Peter Würtz.
+/// \version 1.29 Further fix to SPI from Peter Würtz.
+/// \version 1.30 10 microsecond delays from bcm2835_spi_transfer and bcm2835_spi_transfern for
+///               significant performance improvements, Patch by Alan Watson.
+/// \version 1.31 Fix a GCC warning about dummy variable, patched by Alan Watson. Thanks.
+/// \version 1.32 Added option I2C_V1 definition to compile for version 1 RPi. 
+///               By default I2C code is generated for the V2 RPi which has SDA1 and SCL1 connected.
+///               Contributed by Malcolm Wiles.
+///
 /// \author  Mike McCauley (mikem@airspayce.com) DO NOT CONTACT THE AUTHOR DIRECTLY: USE THE LISTS
 
 
@@ -414,7 +484,7 @@ typedef enum
     RPI_GPIO_P1_08        = 14,  ///< Version 1, Pin P1-08, defaults to alt function 0 UART0_TXD
     RPI_GPIO_P1_10        = 15,  ///< Version 1, Pin P1-10, defaults to alt function 0 UART0_RXD
     RPI_GPIO_P1_11        = 17,  ///< Version 1, Pin P1-11
-    RPI_GPIO_P1_12        = 18,  ///< Version 1, Pin P1-12
+    RPI_GPIO_P1_12        = 18,  ///< Version 1, Pin P1-12, can be PWM channel 0 in ALT FUN 5
     RPI_GPIO_P1_13        = 21,  ///< Version 1, Pin P1-13
     RPI_GPIO_P1_15        = 22,  ///< Version 1, Pin P1-15
     RPI_GPIO_P1_16        = 23,  ///< Version 1, Pin P1-16
@@ -433,7 +503,7 @@ typedef enum
     RPI_V2_GPIO_P1_08     = 14,  ///< Version 2, Pin P1-08, defaults to alt function 0 UART0_TXD
     RPI_V2_GPIO_P1_10     = 15,  ///< Version 2, Pin P1-10, defaults to alt function 0 UART0_RXD
     RPI_V2_GPIO_P1_11     = 17,  ///< Version 2, Pin P1-11
-    RPI_V2_GPIO_P1_12     = 18,  ///< Version 2, Pin P1-12
+    RPI_V2_GPIO_P1_12     = 18,  ///< Version 2, Pin P1-12, can be PWM channel 0 in ALT FUN 5
     RPI_V2_GPIO_P1_13     = 27,  ///< Version 2, Pin P1-13
     RPI_V2_GPIO_P1_15     = 22,  ///< Version 2, Pin P1-15
     RPI_V2_GPIO_P1_16     = 23,  ///< Version 2, Pin P1-16
@@ -543,7 +613,7 @@ typedef enum
     BCM2835_SPI_CLOCK_DIVIDER_8     = 8,       ///< 8 = 32ns = 31.25MHz
     BCM2835_SPI_CLOCK_DIVIDER_4     = 4,       ///< 4 = 16ns = 62.5MHz
     BCM2835_SPI_CLOCK_DIVIDER_2     = 2,       ///< 2 = 8ns = 125MHz, fastest you can get
-    BCM2835_SPI_CLOCK_DIVIDER_1     = 1,       ///< 0 = 262.144us = 3.814697260kHz, same as 0/65536
+    BCM2835_SPI_CLOCK_DIVIDER_1     = 1,       ///< 1 = 262.144us = 3.814697260kHz, same as 0/65536
 } bcm2835SPIClockDivider;
 
 // Defines for I2C
@@ -597,7 +667,7 @@ typedef enum
 /// Specifies the reason codes for the bcm2835_i2c_write and bcm2835_i2c_read functions.
 typedef enum
 {
-    BCM2835_I2C_REASON_OK   		 = 0x00,      ///< Success
+    BCM2835_I2C_REASON_OK   	     = 0x00,      ///< Success
     BCM2835_I2C_REASON_ERROR_NACK    = 0x01,      ///< Received a NACK
     BCM2835_I2C_REASON_ERROR_CLKT    = 0x02,      ///< Received Clock Stretch Timeout
     BCM2835_I2C_REASON_ERROR_DATA    = 0x04,      ///< Not all data is sent / received
@@ -620,32 +690,62 @@ typedef enum
 /// @}
 
 
-// Defines for PWM
+// Defines for PWM, word offsets (ie 4 byte multiples)
 #define BCM2835_PWM_CONTROL 0
 #define BCM2835_PWM_STATUS  1
+#define BCM2835_PWM_DMAC    2
 #define BCM2835_PWM0_RANGE  4
 #define BCM2835_PWM0_DATA   5
+#define BCM2835_PWM_FIF1    6
 #define BCM2835_PWM1_RANGE  8
 #define BCM2835_PWM1_DATA   9
 
+// Defines for PWM Clock, word offsets (ie 4 byte multiples)
 #define BCM2835_PWMCLK_CNTL     40
 #define BCM2835_PWMCLK_DIV      41
+#define BCM2835_PWM_PASSWRD     (0x5A << 24)  ///< Password to enable setting PWM clock
 
-#define BCM2835_PWM1_MS_MODE    0x8000  /// Run in MS mode
-#define BCM2835_PWM1_USEFIFO    0x2000  /// Data from FIFO
-#define BCM2835_PWM1_REVPOLAR   0x1000  /// Reverse polarity
-#define BCM2835_PWM1_OFFSTATE   0x0800  /// Ouput Off state
-#define BCM2835_PWM1_REPEATFF   0x0400  /// Repeat last value if FIFO empty
-#define BCM2835_PWM1_SERIAL     0x0200  /// Run in serial mode
-#define BCM2835_PWM1_ENABLE     0x0100  /// Channel Enable
+#define BCM2835_PWM1_MS_MODE    0x8000  ///< Run in Mark/Space mode
+#define BCM2835_PWM1_USEFIFO    0x2000  ///< Data from FIFO
+#define BCM2835_PWM1_REVPOLAR   0x1000  ///< Reverse polarity
+#define BCM2835_PWM1_OFFSTATE   0x0800  ///< Ouput Off state
+#define BCM2835_PWM1_REPEATFF   0x0400  ///< Repeat last value if FIFO empty
+#define BCM2835_PWM1_SERIAL     0x0200  ///< Run in serial mode
+#define BCM2835_PWM1_ENABLE     0x0100  ///< Channel Enable
 
-#define BCM2835_PWM0_MS_MODE    0x0080  /// Run in MS mode
-#define BCM2835_PWM0_USEFIFO    0x0020  /// Data from FIFO
-#define BCM2835_PWM0_REVPOLAR   0x0010  /// Reverse polarity
-#define BCM2835_PWM0_OFFSTATE   0x0008  /// Ouput Off state
-#define BCM2835_PWM0_REPEATFF   0x0004  /// Repeat last value if FIFO empty
-#define BCM2835_PWM0_SERIAL     0x0002  /// Run in serial mode
-#define BCM2835_PWM0_ENABLE     0x0001  /// Channel Enable
+#define BCM2835_PWM0_MS_MODE    0x0080  ///< Run in Mark/Space mode
+#define BCM2835_PWM_CLEAR_FIFO  0x0040  ///< Clear FIFO
+#define BCM2835_PWM0_USEFIFO    0x0020  ///< Data from FIFO
+#define BCM2835_PWM0_REVPOLAR   0x0010  ///< Reverse polarity
+#define BCM2835_PWM0_OFFSTATE   0x0008  ///< Ouput Off state
+#define BCM2835_PWM0_REPEATFF   0x0004  ///< Repeat last value if FIFO empty
+#define BCM2835_PWM0_SERIAL     0x0002  ///< Run in serial mode
+#define BCM2835_PWM0_ENABLE     0x0001  ///< Channel Enable
+
+/// \brief bcm2835PWMClockDivider
+/// Specifies the divider used to generate the PWM clock from the system clock.
+/// Figures below give the divider, clock period and clock frequency.
+/// Clock divided is based on nominal PWM base clock rate of 19.2MHz
+/// The frequencies shown for each divider have been confirmed by measurement
+typedef enum
+{
+    BCM2835_PWM_CLOCK_DIVIDER_32768 = 32768,   ///< 32768 = 585Hz
+    BCM2835_PWM_CLOCK_DIVIDER_16384 = 16384,   ///< 16384 = 1171.8Hz
+    BCM2835_PWM_CLOCK_DIVIDER_8192  = 8192,    ///< 8192 = 2.34375kHz
+    BCM2835_PWM_CLOCK_DIVIDER_4096  = 4096,    ///< 4096 = 4.6875kHz
+    BCM2835_PWM_CLOCK_DIVIDER_2048  = 2048,    ///< 2048 = 9.375kHz
+    BCM2835_PWM_CLOCK_DIVIDER_1024  = 1024,    ///< 1024 = 18.75kHz
+    BCM2835_PWM_CLOCK_DIVIDER_512   = 512,     ///< 512 = 37.5kHz
+    BCM2835_PWM_CLOCK_DIVIDER_256   = 256,     ///< 256 = 75kHz
+    BCM2835_PWM_CLOCK_DIVIDER_128   = 128,     ///< 128 = 150kHz
+    BCM2835_PWM_CLOCK_DIVIDER_64    = 64,      ///< 64 = 300kHz
+    BCM2835_PWM_CLOCK_DIVIDER_32    = 32,      ///< 32 = 600.0kHz
+    BCM2835_PWM_CLOCK_DIVIDER_16    = 16,      ///< 16 = 1.2MHz
+    BCM2835_PWM_CLOCK_DIVIDER_8     = 8,       ///< 8 = 2.4MHz
+    BCM2835_PWM_CLOCK_DIVIDER_4     = 4,       ///< 4 = 4.8MHz
+    BCM2835_PWM_CLOCK_DIVIDER_2     = 2,       ///< 2 = 9.6MHz, fastest you can get
+    BCM2835_PWM_CLOCK_DIVIDER_1     = 1,       ///< 1 = 4.6875kHz, same as divider 4096
+} bcm2835PWMClockDivider;
 
 // Historical name compatibility
 #ifndef BCM2835_NO_DELAY_COMPATIBILITY
@@ -746,7 +846,7 @@ extern "C" {
 
     /// Sets the Function Select register for the given pin, which configures
     /// the pin as Input, Output or one of the 6 alternate functions.
-    /// \param[in] pin GPIO number, or one of RPI_GPIO_P1_* from RPiGPIOPin.
+    /// \param[in] pin GPIO number, or one of RPI_GPIO_P1_* from \ref RPiGPIOPin.
     /// \param[in] mode Mode to set the pin to, one of BCM2835_GPIO_FSEL_* from \ref bcm2835FunctionSelect
     extern void bcm2835_gpio_fsel(uint8_t pin, uint8_t mode);
 
@@ -787,7 +887,7 @@ extern "C" {
     /// bcm2835_gpio_len(), bcm2835_gpio_aren(), bcm2835_gpio_afen().
     /// Clear the flag for a given pin by calling bcm2835_gpio_set_eds(pin);
     /// \param[in] pin GPIO number, or one of RPI_GPIO_P1_* from \ref RPiGPIOPin.
-    /// \return HIGH if the event detect status for th given pin is true.
+    /// \return HIGH if the event detect status for the given pin is true.
     extern uint8_t bcm2835_gpio_eds(uint8_t pin);
 
     /// Sets the Event Detect Status register for a given pin to 1, 
@@ -883,7 +983,9 @@ extern "C" {
 
     /// Sets the Pad Control for the given GPIO group.
     /// \param[in] group The GPIO pad group number, one of BCM2835_PAD_GROUP_GPIO_*
-    /// \param[in] control Mask of bits from BCM2835_PAD_* from \ref bcm2835PadGroup
+    /// \param[in] control Mask of bits from BCM2835_PAD_* from \ref bcm2835PadGroup. Note 
+    /// that it is not necessary to include BCM2835_PAD_PASSWRD in the mask as this
+    /// is automatically included.
     extern void bcm2835_gpio_set_pad(uint8_t group, uint32_t control);
 
     /// Delays for the specified number of milliseconds.
@@ -1098,7 +1200,7 @@ extern "C" {
 
     /// Read the System Timer Counter register.
     /// \return the value read from the System Timer Counter Lower 32 bits register
-    uint64_t bcm2835_st_read(void);
+    extern uint64_t bcm2835_st_read(void);
 
     /// Delays for the specified number of microseconds with offset.
     /// \param[in] offset_micros Offset in microseconds
@@ -1107,6 +1209,40 @@ extern "C" {
 
     /// @} 
 
+    /// \defgroup pwm Pulse Width Modulation
+    /// Allows control of 2 independent PWM channels. A limited subset of GPIO pins
+    /// can be connected to one of these 2 channels, allowing PWM control of GPIO pins.
+    /// You have to set the desired pin into a particular Alt Fun to PWM output. See the PWM
+    /// documentation on the Main Page.
+    /// @{
+
+  /// Sets the PWM clock divisor, 
+  /// to control the basic PWM pulse widths.
+  /// \param[in] divisor Divides the basic 19.2MHz PWM clock. You can use one of the common
+  /// values BCM2835_PWM_CLOCK_DIVIDER_* in \ref bcm2835PWMClockDivider.
+  extern void bcm2835_pwm_set_clock(uint32_t divisor);
+
+  /// Sets the mode of the given PWM channel,
+  /// allowing you to control the PWM mode and enable/disable that channel
+  /// \param[in] channel The PWM channel. 0 or 1.
+  /// \param[in] markspace Set true if you want Mark-Space mode. 0 for Balanced mode.
+  /// \param[in] enabled Set true to enable this channel and produce PWM pulses.
+  extern void bcm2835_pwm_set_mode(uint8_t channel, uint8_t markspace, uint8_t enabled);
+
+  /// Sets the maximum range of the PWM output.
+  /// The data value can vary between 0 and this range to control PWM output
+  /// \param[in] channel The PWM channel. 0 or 1.
+  /// \param[in] range The maximum value permitted for DATA.
+  extern void bcm2835_pwm_set_range(uint8_t channel, uint32_t range);
+
+  /// Sets the PWM pulse ratio to emit to DATA/RANGE, 
+  /// where RANGE is set by bcm2835_pwm_set_range().
+  /// \param[in] channel The PWM channel. 0 or 1.
+  /// \param[in] data Controls the PWM output ratio as a fraction of the range. 
+  ///  Can vary from 0 to RANGE.
+  extern void bcm2835_pwm_set_data(uint8_t channel, uint32_t data);
+
+    /// @} 
 #ifdef __cplusplus
 }
 #endif
@@ -1127,3 +1263,6 @@ extern "C" {
 
 /// @example spin.c
 /// Shows how to use SPI interface to transfer a number of bytes to and from an SPI device
+
+/// @example pwm.c
+/// Shows how to use PWM to control GPIO pins
