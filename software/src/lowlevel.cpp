@@ -13,7 +13,7 @@
 #endif
 
 #include "lowlevel.h"
-#include "bcm2835.h"
+#include <bcm2835.h>
 
 #define XO2_I2C_CLOCK_SPEED     (400 * 1000)
 

@@ -4,11 +4,11 @@ CXXFLAGS	= -ansi $(UNIFLAGS) -fvisibility-inlines-hidden
 CC				= gcc
 CCFLAGS		= $(UNIFLAGS)
 
-DEPS			= pif.h pifwrap.h lowlevel.h bcm2835.h llbufs.h
-OBJS			= pif.o pifwrap.o lowlevel.o bcm2835.o
+DEPS			= pif.h pifwrap.h lowlevel.h llbufs.h
+OBJS			= pif.o pifwrap.o lowlevel.o
 TARGET		= libpif.so
 LIBS			= -lstdc++
-LDFLAGS		= -shared -Wl,-soname,$(TARGET) -fvisibility=hidden
+LDFLAGS		= -shared -Wl,-soname,$(TARGET) -fvisibility=hidden -lbcm2835
 
 
 
