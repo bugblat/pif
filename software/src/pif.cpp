@@ -130,7 +130,7 @@ Non-Volatile Register (NVR) Commands
 #include <time.h>
 
 #include "lowlevel.h"
-#include "bcm2835.h"
+#include <bcm2835.h>
 #include "pif.h"
 
 #define ISC_ERASE               0x0e
@@ -246,7 +246,7 @@ bool Tpif::_setUfmPageAddr(int pageNumber) {
 bool Tpif::progDone() {
   bool ok = _doSimple(ISC_PROG_DONE);
   // sleep for 200us
-  nanosleep((struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
+  nanosleep((const struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
   return ok;
   }
 
@@ -255,7 +255,7 @@ bool Tpif::refresh() {
   oBuf.byte(ISC_REFRESH).byte(0).byte(0);
   bool ok = _cfgWrite(oBuf);
   // sleep for 5ms
-  nanosleep((struct timespec[]){{0, (5 * MILLISEC)}}, NULL);
+  nanosleep((const struct timespec[]){{0, (5 * MILLISEC)}}, NULL);
   return ok;
   }
 
@@ -276,13 +276,13 @@ bool Tpif::eraseUfm() {
 //---------------------------------------------------------------------
 bool Tpif::enableCfgInterfaceOffline() {
   bool ok = _doSimple(ISC_ENABLE_PROG, 0x08);
-  nanosleep((struct timespec[]){{0, (5 * MICROSEC)}}, NULL);
+  nanosleep((const struct timespec[]){{0, (5 * MICROSEC)}}, NULL);
   return ok;
   }
 
 bool Tpif::enableCfgInterfaceTransparent() {
   bool ok = _doSimple(ISC_ENABLE_X, 0x08);
-  nanosleep((struct timespec[]){{0, (5 * MICROSEC)}}, NULL);
+  nanosleep((const struct timespec[]){{0, (5 * MICROSEC)}}, NULL);
   return ok;
   }
 
@@ -309,7 +309,7 @@ bool Tpif::_progPage(int Acmd, const uint8_t *p) {
 
   bool ok = _cfgWrite(oBuf);
   // sleep for 200us
-  nanosleep((struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
+  nanosleep((const struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
   return ok;
   }
 
@@ -387,7 +387,7 @@ bool Tpif::setUsercode(uint8_t* p) {
 
   bool ok = _cfgWrite(oBuf);
   // sleep for 200us
-  nanosleep((struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
+  nanosleep((const struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
   return ok;
   }
 

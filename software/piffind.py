@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #----------------------------------------------------------------------
 # Name:        piffind.py
 # Purpose:     sarch for the XO2 via the smbus Python library
@@ -8,7 +10,6 @@
 # Copyright:   (c) Tim 2013
 # Licence:     Creative Commons Attribution-ShareAlike 3.0 Unported License.
 #----------------------------------------------------------------------
-#!/usr/bin/env python
 
 import sys, ctypes, pifglobs
 from ctypes   import *
