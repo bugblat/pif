@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 ##---------------------------------------------------------
 # Name:        pifweb.py
 # Purpose:     control a pif board via a web server
@@ -12,7 +14,6 @@
 #
 # windows command line start: python pifweb.py
 #
-#!/usr/bin/env python
 
 import sys, web, ctypes, pifglobs
 from web      import form

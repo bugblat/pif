@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #----------------------------------------------------------------------
 # Name:        pifload.py
 # Purpose:     load a configuration into a pif board via the hidapi DLL/SO
@@ -8,7 +10,6 @@
 # Copyright:   (c) Tim 2013
 # Licence:     Creative Commons Attribution-ShareAlike 3.0 Unported License.
 #----------------------------------------------------------------------
-#!/usr/bin/env python
 
 import sys, ctypes, pifglobs
 from ctypes   import *
@@ -257,7 +258,7 @@ def main():
     print('Configuration file is ' + jedecFile)
 
     pifglobs.pif = ctypes.CDLL("libpif.so")
-
+    print('hallo')
     strBuf = create_string_buffer(1000)
     rv = pifglobs.pif.pifVersion(strBuf, sizeof(strBuf))
     print('Using pif library version: %s\n' % repr(strBuf.value))
