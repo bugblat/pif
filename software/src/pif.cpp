@@ -162,6 +162,14 @@ static const int MICROSEC = 1000;              // nanosecs
 static const int MILLISEC = 1000 * MICROSEC;   // nanosecs
 
 //---------------------------------------------------------------------
+void Tpif::myNanoSleep(uint32_t ns) {
+  struct timespec tim;
+  tim.tv_sec = 0;
+  tim.tv_nsec = (long)ns;
+  nanosleep(&tim, NULL);
+  }
+
+//---------------------------------------------------------------------
 uint32_t Tpif::_dwordBE(uint8_t *p) {
   uint32_t v = 0;
   for (int i=0; i<4; i++)
@@ -246,7 +254,7 @@ bool Tpif::_setUfmPageAddr(int pageNumber) {
 bool Tpif::progDone() {
   bool ok = _doSimple(ISC_PROG_DONE);
   // sleep for 200us
-  nanosleep((struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
+  myNanoSleep(200 * MICROSEC);
   return ok;
   }
 
@@ -255,7 +263,7 @@ bool Tpif::refresh() {
   oBuf.byte(ISC_REFRESH).byte(0).byte(0);
   bool ok = _cfgWrite(oBuf);
   // sleep for 5ms
-  nanosleep((struct timespec[]){{0, (5 * MILLISEC)}}, NULL);
+  myNanoSleep(5 * MILLISEC);
   return ok;
   }
 
@@ -276,13 +284,13 @@ bool Tpif::eraseUfm() {
 //---------------------------------------------------------------------
 bool Tpif::enableCfgInterfaceOffline() {
   bool ok = _doSimple(ISC_ENABLE_PROG, 0x08);
-  nanosleep((struct timespec[]){{0, (5 * MICROSEC)}}, NULL);
+  myNanoSleep(5 * MICROSEC);
   return ok;
   }
 
 bool Tpif::enableCfgInterfaceTransparent() {
   bool ok = _doSimple(ISC_ENABLE_X, 0x08);
-  nanosleep((struct timespec[]){{0, (5 * MICROSEC)}}, NULL);
+  myNanoSleep(5 * MICROSEC);
   return ok;
   }
 

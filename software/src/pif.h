@@ -31,6 +31,7 @@ class Tpif {
   private:
     TlowLevel *pLo;
 
+    void myNanoSleep(uint32_t ns);
     uint32_t _dwordBE(uint8_t *p);
     bool _cfgWrite(TllWrBuf& oBuf);
     bool _cfgWriteRead(TllWrBuf& oBuf, uint8_t *pRdData, size_t ArdLen);
