@@ -20,7 +20,7 @@ int main() {
 
   if (h) {
     uint32_t v = 99;
-    bool x = getDeviceIdCode(h, &v);
+    bool x = pifGetDeviceIdCode(h, &v);
     printf("\nresult=%d, ID code=%x", x, v);
 
     pifClose(h);
