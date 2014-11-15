@@ -317,7 +317,7 @@ bool Tpif::_progPage(int Acmd, const uint8_t *p) {
 
   bool ok = _cfgWrite(oBuf);
   // sleep for 200us
-  nanosleep((struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
+  myNanoSleep(200 * MICROSEC);
   return ok;
   }
 
@@ -395,7 +395,7 @@ bool Tpif::setUsercode(uint8_t* p) {
 
   bool ok = _cfgWrite(oBuf);
   // sleep for 200us
-  nanosleep((struct timespec[]){{0, (200 * MICROSEC)}}, NULL);
+  myNanoSleep(200 * MICROSEC);
   return ok;
   }
 
